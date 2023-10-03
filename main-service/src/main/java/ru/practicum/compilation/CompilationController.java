@@ -34,20 +34,20 @@ public class CompilationController {
     public List<CompilationDto> getCompilations(@RequestParam(required = false) Boolean pinned,
                                                 @RequestParam(defaultValue = "0") @PositiveOrZero int from,
                                                 @RequestParam(defaultValue = "10") @Positive int size) {
-        log.info(MessageManager.RECEIVED_GET, "/compilations");
+        log.info(MessageManager.receivedGet, "/compilations");
         return compilationService.getCompilations(pinned, from, size);
     }
 
     @GetMapping("/compilations/{compId}")
     public CompilationDto getCompilationById(@PathVariable @Valid @Positive Long compId) {
-        log.info(MessageManager.RECEIVED_GET_ID, "/compilations", compId);
+        log.info(MessageManager.receivedGetId, "/compilations", compId);
         return compilationService.getCompilationById(compId);
     }
 
     @PostMapping("/admin/compilations")
     @ResponseStatus(HttpStatus.CREATED)
     public CompilationDto createCompilation(@RequestBody @Validated NewCompilationDto newCompilationDto) {
-        log.info(MessageManager.RECEIVED_POST, "/admin/compilations");
+        log.info(MessageManager.receivedPost, "/admin/compilations");
         return compilationService.createCompilation(newCompilationDto);
     }
 
@@ -55,14 +55,14 @@ public class CompilationController {
     public CompilationDto updateCompilation(@PathVariable @Valid @Positive Long compId,
                                             @RequestBody @Validated
                                             UpdateCompilationRequestDto updateCompilationRequestDto) {
-        log.info(MessageManager.RECEIVED_PATCH, "/admin/compilations", compId);
+        log.info(MessageManager.receivedPatch, "/admin/compilations", compId);
         return compilationService.updateCompilation(compId, updateCompilationRequestDto);
     }
 
     @DeleteMapping(value = "/admin/compilations/{compId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteCompilation(@PathVariable @Valid @Positive Long compId) {
-        log.info(MessageManager.RECEIVED_DELETE, "/admin/compilations", compId);
+        log.info(MessageManager.receivedDelete, "/admin/compilations", compId);
         compilationService.deleteCompilation(compId);
     }
 }

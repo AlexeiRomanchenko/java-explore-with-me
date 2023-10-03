@@ -25,7 +25,7 @@ public class EventController {
     @ResponseStatus(HttpStatus.CREATED)
     public EventFullDto createEvent(@PathVariable @Valid @Positive Long userId,
                                     @RequestBody @Validated NewEventDto newEventDto) {
-        log.info(MessageManager.RECEIVED_POST, "/users/{userId}/events", userId);
+        log.info(MessageManager.receivedPost, "/users/{userId}/events", userId);
         return eventService.createEvent(userId, newEventDto);
     }
 
@@ -33,14 +33,14 @@ public class EventController {
     public List<EventShortDto> getEvents(@PathVariable @Valid @Positive Long userId,
                                          @RequestParam(defaultValue = "0") @PositiveOrZero int from,
                                          @RequestParam(defaultValue = "10") @Positive int size) {
-        log.info(MessageManager.RECEIVED_GET_ID, "/users/{userId}/events", userId);
+        log.info(MessageManager.receivedGetId, "/users/{userId}/events", userId);
         return eventService.getEvents(userId, from, size);
     }
 
     @GetMapping("/users/{userId}/events/{eventId}")
     public EventFullDto getEventById(@PathVariable @Valid @Positive Long userId,
                                      @PathVariable @Valid @Positive Long eventId) {
-        log.info(MessageManager.RECEIVED_GET_ID, "/users/{userId}", "/events/{eventId}");
+        log.info(MessageManager.receivedGetId, "/users/{userId}", "/events/{eventId}");
         return eventService.getEventById(userId, eventId);
     }
 
@@ -48,7 +48,7 @@ public class EventController {
     public EventFullDto updateEventByUser(@PathVariable @Valid @Positive Long userId,
                                           @PathVariable @Valid @Positive Long eventId,
                                           @RequestBody @Validated UpdateEventUserRequestDto updateEventUserRequestDto) {
-        log.info(MessageManager.RECEIVED_PATCH, "/users/{userId}", "/events/{eventId}");
+        log.info(MessageManager.receivedPatch, "/users/{userId}", "/events/{eventId}");
         return eventService.updateEventByUser(userId, eventId, updateEventUserRequestDto);
     }
 
@@ -60,7 +60,7 @@ public class EventController {
                                                @RequestParam(required = false) String rangeEnd,
                                                @RequestParam(defaultValue = "0") @PositiveOrZero int from,
                                                @RequestParam(defaultValue = "10") @Positive int size) {
-        log.info(MessageManager.RECEIVED_GET, "/admin/events");
+        log.info(MessageManager.receivedGet, "/admin/events");
         return eventService.getEventsByAdmin(users, states, categories, rangeStart, rangeEnd, from, size);
     }
 
@@ -68,7 +68,7 @@ public class EventController {
     public EventFullDto updateEventByAdmin(@PathVariable @Valid @Positive Long eventId,
                                            @RequestBody @Validated UpdateEventAdminRequestDto
                                                    updateEventAdminRequestDto) {
-        log.info(MessageManager.RECEIVED_PATCH, "/admin/events", eventId);
+        log.info(MessageManager.receivedPatch, "/admin/events", eventId);
         return eventService.updateEventByAdmin(eventId, updateEventAdminRequestDto);
     }
 
@@ -83,7 +83,7 @@ public class EventController {
                                                   @RequestParam(defaultValue = "0") @PositiveOrZero int from,
                                                   @RequestParam(defaultValue = "10") @Positive int size,
                                                   HttpServletRequest request) {
-        log.info(MessageManager.RECEIVED_GET, "events");
+        log.info(MessageManager.receivedGet, "events");
         return eventService.getPublishedEvents(text, categories, paid, rangeStart, rangeEnd, onlyAvailable,
                 sort, from, size, request);
     }
@@ -91,7 +91,7 @@ public class EventController {
     @GetMapping("/events/{id}")
     public EventFullDto getPublishedEventById(@PathVariable @Valid @Positive Long id,
                                               HttpServletRequest request) {
-        log.info(MessageManager.RECEIVED_GET_ID, "/events", id);
+        log.info(MessageManager.receivedGetId, "/events", id);
         return eventService.getPublishedEventById(id, request);
     }
 }
