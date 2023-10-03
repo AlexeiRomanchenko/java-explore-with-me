@@ -6,6 +6,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.discriptions.ConstantManager;
 import ru.practicum.discriptions.MessageManager;
 import ru.practicum.dto.HitDto;
 import ru.practicum.StatClient;
@@ -48,7 +49,7 @@ import static ru.practicum.location.dto.LocationMapper.toLocation;
 @RequiredArgsConstructor
 @Slf4j
 public class EventServiceImpl implements EventService {
-    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(ConstantManager.DATE_TIME_PATTERN);
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
@@ -63,7 +64,7 @@ public class EventServiceImpl implements EventService {
                 .orElseThrow(() -> new CategoryNotFoundException(newEventDto.getCategory()));
         Event event = toEvent(newEventDto);
         if (event.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
-            throw new ValidationRequestException(MessageManager.cannotCreateTheEvent2Hours);
+            throw new ValidationRequestException(MessageManager.CANNOT_CREATE_THE_EVENT_2_HOURS);
         }
         event.setCategory(category);
         event.setCreatedOn(LocalDateTime.now());
@@ -106,7 +107,7 @@ public class EventServiceImpl implements EventService {
         if (event.getState() != null
                 && event.getState() != EventState.PENDING
                 && event.getState() != EventState.CANCELED) {
-            throw new ForbiddenException(MessageManager.onlyChangedEvents);
+            throw new ForbiddenException(MessageManager.ONLY_CHANGED_EVENTS);
         }
         if (updateEventUserRequestDto.getEventDate() != null
                 && LocalDateTime.parse(updateEventUserRequestDto.getEventDate(), formatter)
@@ -130,7 +131,7 @@ public class EventServiceImpl implements EventService {
         }
         if (updateEventUserRequestDto.getEventDate() != null) {
             event.setEventDate(LocalDateTime.parse(updateEventUserRequestDto.getEventDate(),
-                    DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+                    DateTimeFormatter.ofPattern(ConstantManager.DATE_TIME_PATTERN)));
         }
         if (updateEventUserRequestDto.getLocation() != null) {
             Location location = event.getLocation();
@@ -171,19 +172,19 @@ public class EventServiceImpl implements EventService {
         if (updateEventAdminRequestDto.getStateAction() != null) {
             if (updateEventAdminRequestDto.getStateAction() == StateAdminAction.PUBLISH_EVENT) {
                 if (event.getState() != EventState.PENDING) {
-                    throw new ForbiddenException(MessageManager.cannotPublisherNotInRightState + event.getState());
+                    throw new ForbiddenException(MessageManager.CANNOT_PUBLISHER_NOT_IN_RIGHT_STATE + event.getState());
                 }
                 if (event.getPublishedOn() != null
                         && event.getEventDate().isAfter(event.getPublishedOn().minusHours(1))) {
                     throw new ValidationRequestException(
-                            MessageManager.cannotCreateTheEvent1Hours);
+                            MessageManager.CANNOT_CREATE_THE_EVENT_1_HOURS);
                 }
                 event.setPublishedOn(LocalDateTime.now());
                 event.setState(EventState.PUBLISHED);
             }
             if (updateEventAdminRequestDto.getStateAction() == StateAdminAction.REJECT_EVENT) {
                 if (event.getState() == EventState.PUBLISHED) {
-                    throw new ForbiddenException(MessageManager.cannotRejectAlreadyPublisher);
+                    throw new ForbiddenException(MessageManager.CANNOT_REJECT_ALREADY_PUBLISHER);
                 } else {
                     event.setState(EventState.CANCELED);
                 }
@@ -272,7 +273,7 @@ public class EventServiceImpl implements EventService {
                 .build());
         if (rangeStart != null && rangeEnd != null &&
                 LocalDateTime.parse(rangeStart, formatter).isAfter(LocalDateTime.parse(rangeEnd, formatter))) {
-            throw new ValidationRequestException(MessageManager.dateStartAfterEnd);
+            throw new ValidationRequestException(MessageManager.DATE_START_AFTER_END);
         }
         List<Event> events = eventRepository.findPublishedEvents(
                 text,
@@ -297,7 +298,7 @@ public class EventServiceImpl implements EventService {
                     case VIEWS:
                         eventShortDtos.sort(Comparator.comparing(EventShortDto::getViews));
                         break;
-                    default: throw new ValidationRequestException(MessageManager.notValid);
+                    default: throw new ValidationRequestException(MessageManager.NOT_VALID);
                 }
             }
         }
@@ -330,7 +331,7 @@ public class EventServiceImpl implements EventService {
                 try {
                     EventState.valueOf(state);
                 } catch (IllegalArgumentException e) {
-                    throw new ValidationRequestException(MessageManager.wrongStates);
+                    throw new ValidationRequestException(MessageManager.WRONG_STATES);
                 }
         }
     }

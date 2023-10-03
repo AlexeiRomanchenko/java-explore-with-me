@@ -1,6 +1,7 @@
 package ru.practicum.model;
 
 import lombok.experimental.UtilityClass;
+import ru.practicum.discriptions.ConstantManager;
 import ru.practicum.dto.HitDto;
 
 import java.time.LocalDateTime;
@@ -14,7 +15,7 @@ public class HitMapper {
                 .app(hitDto.getApp())
                 .uri(hitDto.getUri())
                 .ip(hitDto.getIp())
-                .timestamp(LocalDateTime.parse(hitDto.getTimestamp(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
+                .timestamp(LocalDateTime.parse(hitDto.getTimestamp(), DateTimeFormatter.ofPattern(ConstantManager.DATE_TIME_PATTERN)))
                 .build();
     }
 }

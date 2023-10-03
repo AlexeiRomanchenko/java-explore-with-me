@@ -25,20 +25,20 @@ public class ParticipationRequestController {
     @ResponseStatus(HttpStatus.CREATED)
     public ParticipationRequestDto createParticipationRequest(@PathVariable @Valid @Positive Long userId,
                                                               @RequestParam @Valid @Positive Long eventId) {
-        log.info(MessageManager.receivedPostId, "/users/{userId}/requests", userId);
+        log.info(MessageManager.RECEIVED_POST_ID, "/users/{userId}/requests", userId);
         return participationRequestService.createParticipationRequest(userId, eventId);
     }
 
     @PatchMapping("/users/{userId}/requests/{requestId}/cancel")
     public ParticipationRequestDto cancelParticipationRequest(@PathVariable @Valid @Positive Long userId,
                                                               @PathVariable @Valid @Positive Long requestId) {
-        log.info(MessageManager.receivedPatch, "/users/{userId}/requests/{requestId}/cancel", userId);
+        log.info(MessageManager.RECEIVED_PATCH, "/users/{userId}/requests/{requestId}/cancel", userId);
         return participationRequestService.cancelParticipationRequest(userId, requestId);
     }
 
     @GetMapping("/users/{userId}/requests")
     public List<ParticipationRequestDto> getParticipationRequests(@PathVariable @Valid @Positive Long userId) {
-        log.info(MessageManager.receivedGet, "/users/{userId}/requests", userId);
+        log.info(MessageManager.RECEIVED_GET, "/users/{userId}/requests", userId);
         return participationRequestService.getParticipationRequests(userId);
     }
 
@@ -46,7 +46,7 @@ public class ParticipationRequestController {
     public List<ParticipationRequestDto> getParticipationRequestsForUserEvent(
             @PathVariable @Valid @Positive Long userId,
             @PathVariable @Valid @Positive Long eventId) {
-        log.info(MessageManager.receivedGetId, "/users/{userId}/events/{eventId}/requests", userId);
+        log.info(MessageManager.RECEIVED_GET_ID, "/users/{userId}/events/{eventId}/requests", userId);
         return participationRequestService.getParticipationRequestsForUserEvent(userId, eventId);
     }
 
@@ -55,7 +55,7 @@ public class ParticipationRequestController {
             @PathVariable @Valid @Positive Long userId,
             @PathVariable @Valid @Positive Long eventId,
             @RequestBody EventRequestStatusUpdateRequestDto eventRequestStatusUpdateRequest) {
-        log.info(MessageManager.receivedPatch, "/users/{userId}/events/{eventId}/requests", userId);
+        log.info(MessageManager.RECEIVED_PATCH, "/users/{userId}/events/{eventId}/requests", userId);
         return participationRequestService.changeParticipationRequestsStatus(
                 userId, eventId, eventRequestStatusUpdateRequest);
     }

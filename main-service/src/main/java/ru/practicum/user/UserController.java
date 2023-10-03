@@ -36,21 +36,21 @@ public class UserController {
     public List<UserDto> getUsers(@RequestParam(required = false) List<Long> ids,
                                   @RequestParam(defaultValue = "0") @PositiveOrZero int from,
                                   @RequestParam(defaultValue = "10") @Positive int size) {
-        log.info(MessageManager.receivedGet, "/admin/users", ids);
+        log.info(MessageManager.RECEIVED_GET, "/admin/users", ids);
         return ids == null ? userService.getUsers(from, size) : userService.getUsers(ids, from, size);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public UserDto createUser(@RequestBody @Validated NewUserRequestDto newUserRequestDto) {
-        log.info(MessageManager.receivedPost, "/admin/users");
+        log.info(MessageManager.RECEIVED_POST, "/admin/users");
         return userService.createUser(newUserRequestDto);
     }
 
     @DeleteMapping(value = "/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteUser(@PathVariable @Positive Long id) {
-        log.info(MessageManager.receivedDelete, "/admin/users", id);
+        log.info(MessageManager.RECEIVED_DELETE, "/admin/users", id);
         userService.deleteUser(id);
     }
 }

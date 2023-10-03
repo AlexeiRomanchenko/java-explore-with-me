@@ -1,5 +1,6 @@
 package ru.practicum.event.dto;
 
+import ru.practicum.discriptions.ConstantManager;
 import ru.practicum.event.Event;
 import ru.practicum.request.ParticipationRequest;
 import ru.practicum.request.ParticipationRequestStatus;
@@ -14,7 +15,7 @@ import static ru.practicum.location.dto.LocationMapper.toLocationDto;
 import static ru.practicum.user.dto.UserMapper.toUserShortDto;
 
 public class EventMapper {
-    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(ConstantManager.DATE_TIME_PATTERN);
 
     private EventMapper() {
     }
