@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.discriptions.MessageManager;
 import ru.practicum.dto.HitDto;
 import ru.practicum.StatClient;
 import ru.practicum.dto.StatDto;
@@ -42,6 +44,7 @@ import static ru.practicum.event.dto.EventMapper.toEventFullDto;
 import static ru.practicum.location.dto.LocationMapper.toLocation;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 @Slf4j
 public class EventServiceImpl implements EventService {
@@ -60,7 +63,7 @@ public class EventServiceImpl implements EventService {
                 .orElseThrow(() -> new CategoryNotFoundException(newEventDto.getCategory()));
         Event event = toEvent(newEventDto);
         if (event.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
-            throw new ValidationRequestException("Cannot create the event, because less 2 hours before event datetime");
+            throw new ValidationRequestException(MessageManager.CANNOT_CREATE_THE_EVENT_2_HOURS);
         }
         event.setCategory(category);
         event.setCreatedOn(LocalDateTime.now());
@@ -72,6 +75,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<EventShortDto> getEvents(Long userId, int from, int size) {
         log.info("Getting events added by the current user: user_id = " + userId + ", from = " + from +
                 ", size = " + size);
@@ -83,6 +87,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public EventFullDto getEventById(Long userId, Long eventId) {
         log.info("Getting full information about the event added by the current user: user_id = " + userId +
                 ", event_id = " + eventId);
@@ -92,18 +97,22 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public EventFullDto updateEventByUser(Long userId, Long eventId, UpdateEventUserRequestDto updateEventUserRequestDto) {
+    public EventFullDto updateEventByUser(Long userId, Long eventId,
+                                          UpdateEventUserRequestDto updateEventUserRequestDto) {
         log.info("Updating event information: user_id = " + userId + ", event_id = " + eventId +
                 ", update_event = " + updateEventUserRequestDto);
         userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
         Event event = eventRepository.findById(eventId).orElseThrow(() -> new EventNotFoundException(eventId));
-        if (event.getState() != null && event.getState() != EventState.PENDING && event.getState() != EventState.CANCELED) {
-            throw new ForbiddenException("Only pending or canceled events can be changed");
+        if (event.getState() != null
+                && event.getState() != EventState.PENDING
+                && event.getState() != EventState.CANCELED) {
+            throw new ForbiddenException(MessageManager.ONLY_CHANGED_EVENTS);
         }
         if (updateEventUserRequestDto.getEventDate() != null
                 && LocalDateTime.parse(updateEventUserRequestDto.getEventDate(), formatter)
                 .isBefore(LocalDateTime.now().plusHours(2))) {
-            throw new ValidationRequestException(String.format("Event date must not be before 2 hours from current time. New value: %s",
+            throw new ValidationRequestException(
+                    String.format("Event date must not be before 2 hours from current time. New value: %s",
                     updateEventUserRequestDto.getEventDate()));
         }
         if (updateEventUserRequestDto.getTitle() != null) {
@@ -156,22 +165,25 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventFullDto updateEventByAdmin(Long eventId, UpdateEventAdminRequestDto updateEventAdminRequestDto) {
-        log.info("updating information about the event by the administrator: event_id = " + eventId + ", update_event = " + updateEventAdminRequestDto);
+        log.info("updating information about the event by the administrator: event_id = "
+                + eventId + ", update_event = " + updateEventAdminRequestDto);
         Event event = eventRepository.findById(eventId).orElseThrow(() -> new EventNotFoundException(eventId));
         if (updateEventAdminRequestDto.getStateAction() != null) {
             if (updateEventAdminRequestDto.getStateAction() == StateAdminAction.PUBLISH_EVENT) {
                 if (event.getState() != EventState.PENDING) {
-                    throw new ForbiddenException("Cannot publish the event because it's not in the right state: " + event.getState());
+                    throw new ForbiddenException(MessageManager.CANNOT_PUBLISHER_NOT_IN_RIGHT_STATE + event.getState());
                 }
-                if (event.getPublishedOn() != null && event.getEventDate().isAfter(event.getPublishedOn().minusHours(1))) {
-                    throw new ValidationRequestException("Cannot publish the event because it's after 1 hour before event datetime");
+                if (event.getPublishedOn() != null
+                        && event.getEventDate().isAfter(event.getPublishedOn().minusHours(1))) {
+                    throw new ValidationRequestException(
+                            MessageManager.CANNOT_CREATE_THE_EVENT_1_HOURS);
                 }
                 event.setPublishedOn(LocalDateTime.now());
                 event.setState(EventState.PUBLISHED);
             }
             if (updateEventAdminRequestDto.getStateAction() == StateAdminAction.REJECT_EVENT) {
                 if (event.getState() == EventState.PUBLISHED) {
-                    throw new ForbiddenException("Cannot reject the event because it's already published");
+                    throw new ForbiddenException(MessageManager.CANNOT_REJECT_ALREADY_PUBLISHER);
                 } else {
                     event.setState(EventState.CANCELED);
                 }
@@ -180,7 +192,8 @@ public class EventServiceImpl implements EventService {
         if (updateEventAdminRequestDto.getEventDate() != null
                 && LocalDateTime.parse(updateEventAdminRequestDto.getEventDate(), formatter)
                 .isBefore(LocalDateTime.now().plusHours(2))) {
-            throw new ValidationRequestException(String.format("Event date must not be before 2 hours from current time. New value: %s",
+            throw new ValidationRequestException(
+                    String.format("Event date must not be before 2 hours from current time. New value: %s",
                     updateEventAdminRequestDto.getEventDate()));
         }
         if (updateEventAdminRequestDto.getTitle() != null) {
@@ -222,10 +235,11 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<EventFullDto> getEventsByAdmin(List<Long> users, List<String> states, List<Long> categories,
                                                String rangeStart, String rangeEnd, int from, int size) {
-        log.info("Search for events by parameters: user_ids = " + users + ", states = " + states + ", categories = " + categories +
-                ", rangeStart = " + rangeStart + ", rangeEnd = " + rangeEnd);
+        log.info("Search for events by parameters: user_ids = " + users + ", states = " + states
+                + ", categories = " + categories + ", rangeStart = " + rangeStart + ", rangeEnd = " + rangeEnd);
         validateEventStates(states);
         List<Event> events = eventRepository.findEvents(users,
                 states, categories,
@@ -239,8 +253,10 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<EventShortDto> getPublishedEvents(String text, List<Long> categories, Boolean paid, String rangeStart,
-                                                  String rangeEnd, boolean onlyAvailable, String sort, int from, int size,
+                                                  String rangeEnd, boolean onlyAvailable,
+                                                  String sort, int from, int size,
                                                   HttpServletRequest request) {
         log.info("Search for published events by parameters: text = " + text + ", categories = " + categories +
                 ", paid = " + paid + ", rangeStart = " + rangeStart + ", rangeEnd = " + rangeEnd +
@@ -256,7 +272,7 @@ public class EventServiceImpl implements EventService {
                 .build());
         if (rangeStart != null && rangeEnd != null &&
                 LocalDateTime.parse(rangeStart, formatter).isAfter(LocalDateTime.parse(rangeEnd, formatter))) {
-            throw new ValidationRequestException("Date start is after date end.");
+            throw new ValidationRequestException(MessageManager.DATE_START_AFTER_END);
         }
         List<Event> events = eventRepository.findPublishedEvents(
                 text,
@@ -281,7 +297,7 @@ public class EventServiceImpl implements EventService {
                     case VIEWS:
                         eventShortDtos.sort(Comparator.comparing(EventShortDto::getViews));
                         break;
-                    default: throw new ValidationRequestException("Parameter sort is not valid");
+                    default: throw new ValidationRequestException(MessageManager.NOT_VALID);
                 }
             }
         }
@@ -314,7 +330,7 @@ public class EventServiceImpl implements EventService {
                 try {
                     EventState.valueOf(state);
                 } catch (IllegalArgumentException e) {
-                    throw new ValidationRequestException("Wrong states!");
+                    throw new ValidationRequestException(MessageManager.WRONG_STATES);
                 }
         }
     }

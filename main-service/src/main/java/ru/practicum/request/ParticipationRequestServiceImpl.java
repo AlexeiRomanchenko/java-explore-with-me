@@ -3,6 +3,7 @@ package ru.practicum.request;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.event.Event;
 import ru.practicum.event.EventRepository;
 import ru.practicum.event.EventState;
@@ -16,7 +17,6 @@ import ru.practicum.request.dto.ParticipationRequestMapper;
 import ru.practicum.user.User;
 import ru.practicum.user.UserRepository;
 
-import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,9 +25,10 @@ import java.util.stream.Collectors;
 
 import static ru.practicum.request.dto.ParticipationRequestMapper.toParticipationRequestDto;
 
-@Service
-@RequiredArgsConstructor
 @Slf4j
+@Service
+@Transactional
+@RequiredArgsConstructor
 public class ParticipationRequestServiceImpl implements ParticipationRequestService {
     private final ParticipationRequestRepository participationRequestRepository;
     private final UserRepository userRepository;
@@ -78,6 +79,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ParticipationRequestDto> getParticipationRequests(Long userId) {
         log.info("Getting information about the current user's requests to participate in other people's events: user_id = " + userId);
         userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
@@ -90,6 +92,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ParticipationRequestDto> getParticipationRequestsForUserEvent(Long userId, Long eventId) {
         log.info("Getting information about requests to participate in the event of the current user: user_id = " + userId +
                 ", event_id = " + eventId);

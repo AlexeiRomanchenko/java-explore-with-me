@@ -2,46 +2,45 @@ package ru.practicum.exceptions;
 
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.exception.ConstraintViolationException;
+import org.hibernate.exception.DataException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import ru.practicum.category.CategoryController;
-import ru.practicum.compilation.CompilationController;
 import ru.practicum.discriptions.MessageManager;
-import ru.practicum.event.EventController;
-import ru.practicum.request.ParticipationRequestController;
-import ru.practicum.user.UserController;
 
 import javax.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 @Slf4j
-@RestControllerAdvice(assignableTypes = {
-        UserController.class,
-        CategoryController.class,
-        EventController.class,
-        ParticipationRequestController.class,
-        CompilationController.class})
+@RestControllerAdvice
 public class ErrorHandler {
 
-    private static final String DATE_TIME_PATTERN = "yyyy-MM-dd HH:mm:ss";
-
-    @ExceptionHandler
+    @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiError handleValidationException(MethodArgumentNotValidException e) {
         log.info(MessageManager.REQUEST_INCORRECTLY);
-        return new ApiError("BAD_REQUEST", "Incorrectly made request.",
-                e.getMessage(), LocalDateTime.now().format(DateTimeFormatter.ofPattern(DATE_TIME_PATTERN)));
+        return new ApiError(MessageManager.BAD_REQUEST, MessageManager.REQUEST_INCORRECTLY,
+                e.getMessage(), LocalDateTime.now());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiError handleValidationException(MissingServletRequestParameterException e) {
+        log.info(MessageManager.REQUEST_INCORRECTLY);
+        return new ApiError(MessageManager.BAD_REQUEST, MessageManager.REQUEST_INCORRECTLY,
+                e.getMessage(), LocalDateTime.now());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiError handleValidationException(ValidationRequestException e) {
-        return new ApiError("BAD_REQUEST", "Incorrectly made request.",
-                e.getMessage(), LocalDateTime.now().format(DateTimeFormatter.ofPattern(DATE_TIME_PATTERN)));
+        log.info(MessageManager.REQUEST_INCORRECTLY);
+        return new ApiError(MessageManager.BAD_REQUEST, MessageManager.REQUEST_INCORRECTLY,
+                e.getMessage(), LocalDateTime.now());
     }
 
     @ExceptionHandler({
@@ -51,21 +50,43 @@ public class ErrorHandler {
             RequestNotFoundException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ApiError handleObjectNotFoundException(EntityNotFoundException e) {
-        return new ApiError("NOT_FOUND", "The required object was not found.",
-                e.getMessage(), LocalDateTime.now().format(DateTimeFormatter.ofPattern(DATE_TIME_PATTERN)));
+        return new ApiError(MessageManager.NOT_FOUND, MessageManager.REQUIRED_NOT_FOUND,
+                e.getMessage(), LocalDateTime.now());
     }
 
-    @ExceptionHandler
+    @ExceptionHandler(ConstraintViolationException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     public ApiError handleValidationException(ConstraintViolationException e) {
-        return new ApiError("CONFLICT", "Integrity constraint has been violated.",
-                e.getMessage(), LocalDateTime.now().format(DateTimeFormatter.ofPattern(DATE_TIME_PATTERN)));
+        return new ApiError(MessageManager.CONFLICT, MessageManager.INTEGRITY_CONSTRAINT,
+                e.getMessage(), LocalDateTime.now());
+    }
+
+   @ExceptionHandler(DataIntegrityViolationException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ApiError handleValidationException(DataIntegrityViolationException e) {
+        return new ApiError(MessageManager.CONFLICT, MessageManager.INTEGRITY_CONSTRAINT,
+                e.getMessage(), LocalDateTime.now());
+    }
+
+    @ExceptionHandler(DataException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ApiError handleValidationException(DataException e) {
+        return new ApiError(MessageManager.CONFLICT, MessageManager.INTEGRITY_CONSTRAINT,
+                e.getMessage(), LocalDateTime.now());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
     public ApiError handleForbiddenException(ForbiddenException e) {
-        return new ApiError("FORBIDDEN", "For the requested operation the conditions are not met.",
-                e.getMessage(), LocalDateTime.now().format(DateTimeFormatter.ofPattern(DATE_TIME_PATTERN)));
+        return new ApiError(MessageManager.FORBIDDEN, MessageManager.WRONG_CONDITIONS,
+                e.getMessage(), LocalDateTime.now());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ApiError handleThrowable(Throwable e) {
+        log.info(MessageManager.UNEXPECTED_ERROR + e.getCause());
+        return new ApiError(MessageManager.INTERNAL_SERVER_ERROR, MessageManager.UNEXPECTED_ERROR,
+                e.getMessage(), LocalDateTime.now());
     }
 }

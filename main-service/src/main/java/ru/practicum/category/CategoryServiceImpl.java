@@ -4,9 +4,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.category.dto.CategoryDto;
 import ru.practicum.category.dto.CategoryMapper;
 import ru.practicum.category.dto.NewCategoryDto;
+import ru.practicum.discriptions.MessageManager;
 import ru.practicum.event.Event;
 import ru.practicum.event.EventRepository;
 import ru.practicum.exceptions.CategoryNotFoundException;
@@ -18,6 +20,7 @@ import java.util.stream.Collectors;
 import static ru.practicum.category.dto.CategoryMapper.toCategory;
 import static ru.practicum.category.dto.CategoryMapper.toCategoryDto;
 
+@Transactional
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -26,6 +29,7 @@ public class CategoryServiceImpl implements CategoryService {
     private final EventRepository eventRepository;
 
     @Override
+    @Transactional(readOnly = true)
     public List<CategoryDto> getCategories(int from, int size) {
         log.info("Getting a list of categories: from = " + from + ", size = " + size);
         return categoryRepository.findAll(PageRequest.of(from / size, size))
@@ -35,6 +39,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public CategoryDto getCategoryById(long catId) {
         log.info("Getting information about a category by ID: cat_id = " + catId);
         return toCategoryDto(categoryRepository.findById(catId)
@@ -64,7 +69,7 @@ public class CategoryServiceImpl implements CategoryService {
                 .orElseThrow(() -> new CategoryNotFoundException(catId));
         Event event = eventRepository.findFirstByCategoryId(catId);
         if (event != null) {
-            throw new ForbiddenException("The category is not empty");
+            throw new ForbiddenException(MessageManager.CATEGOORY_NO_EMPLY);
         }
         categoryRepository.deleteById(catId);
     }

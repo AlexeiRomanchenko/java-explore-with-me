@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.compilation.dto.CompilationDto;
 import ru.practicum.compilation.dto.CompilationMapper;
 import ru.practicum.compilation.dto.NewCompilationDto;
@@ -20,6 +21,7 @@ import static ru.practicum.compilation.dto.CompilationMapper.toCompilation;
 import static ru.practicum.compilation.dto.CompilationMapper.toCompilationDto;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 @Slf4j
 public class CompilationServiceImpl implements CompilationService {
@@ -27,6 +29,7 @@ public class CompilationServiceImpl implements CompilationService {
     private final EventRepository eventRepository;
 
     @Override
+    @Transactional(readOnly = true)
     public List<CompilationDto> getCompilations(Boolean pinned, int from, int size) {
         log.info("Getting collections of events by parameters: pinned = " + pinned + ", from = " + from + ", size = " + size);
         List<Compilation> compilations;
@@ -40,6 +43,7 @@ public class CompilationServiceImpl implements CompilationService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public CompilationDto getCompilationById(Long compId) {
         log.info("Getting a selection of events by ID = " + compId);
         return toCompilationDto(compilationRepository.findById(compId)
