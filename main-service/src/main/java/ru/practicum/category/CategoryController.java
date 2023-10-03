@@ -32,34 +32,34 @@ public class CategoryController {
     @GetMapping("/categories")
     public List<CategoryDto> getCategories(@RequestParam(defaultValue = "0") @PositiveOrZero int from,
                                            @RequestParam(defaultValue = "10") @Positive int size) {
-        log.info(MessageManager.RECEIVED_GET, "/categories");
+        log.info(MessageManager.receivedGet, "/categories");
         return categoryService.getCategories(from, size);
     }
 
     @GetMapping("/categories/{catId}")
     public CategoryDto getCategoryById(@PathVariable @Valid @Positive Long catId) {
-        log.info(MessageManager.RECEIVED_GET_ID, "/categories", catId);
+        log.info(MessageManager.receivedGetId, "/categories", catId);
         return categoryService.getCategoryById(catId);
     }
 
     @PostMapping("/admin/categories")
     @ResponseStatus(HttpStatus.CREATED)
     public CategoryDto createCategory(@RequestBody @Validated NewCategoryDto newCategoryDto) {
-        log.info(MessageManager.RECEIVED_POST, "/categories");
+        log.info(MessageManager.receivedPost, "/categories");
         return categoryService.createCategory(newCategoryDto);
     }
 
     @PatchMapping("/admin/categories/{catId}")
     public CategoryDto updateCategory(@PathVariable @Valid @Positive Long catId,
                                       @RequestBody @Validated NewCategoryDto newCategoryDto) {
-        log.info(MessageManager.RECEIVED_PATCH, "/categories", catId);
+        log.info(MessageManager.receivedPatch, "/categories", catId);
         return categoryService.updateCategory(catId, newCategoryDto);
     }
 
     @DeleteMapping(value = "/admin/categories/{catId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteCategory(@PathVariable @Valid @Positive Long catId) {
-        log.info(MessageManager.RECEIVED_DELETE, "/categories", catId);
+        log.info(MessageManager.receivedDelete, "/categories", catId);
         categoryService.deleteCategory(catId);
     }
 }

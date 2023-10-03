@@ -19,27 +19,27 @@ import java.time.LocalDateTime;
 @RestControllerAdvice
 public class ErrorHandler {
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiError handleValidationException(MethodArgumentNotValidException e) {
-        log.info(MessageManager.REQUEST_INCORRECTLY);
-        return new ApiError(MessageManager.BAD_REQUEST, MessageManager.REQUEST_INCORRECTLY,
+        log.info(MessageManager.requestIncorrectly);
+        return new ApiError(MessageManager.badRequest, MessageManager.requestIncorrectly,
                 e.getMessage(), LocalDateTime.now());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiError handleValidationException(MissingServletRequestParameterException e) {
-        log.info(MessageManager.REQUEST_INCORRECTLY);
-        return new ApiError(MessageManager.BAD_REQUEST, MessageManager.REQUEST_INCORRECTLY,
+        log.info(MessageManager.requestIncorrectly);
+        return new ApiError(MessageManager.badRequest, MessageManager.requestIncorrectly,
                 e.getMessage(), LocalDateTime.now());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiError handleValidationException(ValidationRequestException e) {
-        log.info(MessageManager.REQUEST_INCORRECTLY);
-        return new ApiError(MessageManager.BAD_REQUEST, MessageManager.REQUEST_INCORRECTLY,
+        log.info(MessageManager.requestIncorrectly);
+        return new ApiError(MessageManager.badRequest, MessageManager.requestIncorrectly,
                 e.getMessage(), LocalDateTime.now());
     }
 
@@ -50,43 +50,43 @@ public class ErrorHandler {
             RequestNotFoundException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ApiError handleObjectNotFoundException(EntityNotFoundException e) {
-        return new ApiError(MessageManager.NOT_FOUND, MessageManager.REQUIRED_NOT_FOUND,
+        return new ApiError(MessageManager.notFound, MessageManager.requiredNotFound,
                 e.getMessage(), LocalDateTime.now());
     }
 
-    @ExceptionHandler(ConstraintViolationException.class)
+    @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
     public ApiError handleValidationException(ConstraintViolationException e) {
-        return new ApiError(MessageManager.CONFLICT, MessageManager.INTEGRITY_CONSTRAINT,
+        return new ApiError(MessageManager.conflict, MessageManager.integrityConstraint,
                 e.getMessage(), LocalDateTime.now());
     }
 
-   @ExceptionHandler(DataIntegrityViolationException.class)
+    @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
     public ApiError handleValidationException(DataIntegrityViolationException e) {
-        return new ApiError(MessageManager.CONFLICT, MessageManager.INTEGRITY_CONSTRAINT,
+        return new ApiError(MessageManager.conflict, MessageManager.integrityConstraint,
                 e.getMessage(), LocalDateTime.now());
     }
 
-    @ExceptionHandler(DataException.class)
+    @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
     public ApiError handleValidationException(DataException e) {
-        return new ApiError(MessageManager.CONFLICT, MessageManager.INTEGRITY_CONSTRAINT,
+        return new ApiError(MessageManager.conflict, MessageManager.integrityConstraint,
                 e.getMessage(), LocalDateTime.now());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
     public ApiError handleForbiddenException(ForbiddenException e) {
-        return new ApiError(MessageManager.FORBIDDEN, MessageManager.WRONG_CONDITIONS,
+        return new ApiError(MessageManager.forbidden, MessageManager.wrongConditions,
                 e.getMessage(), LocalDateTime.now());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ApiError handleThrowable(Throwable e) {
-        log.info(MessageManager.UNEXPECTED_ERROR + e.getCause());
-        return new ApiError(MessageManager.INTERNAL_SERVER_ERROR, MessageManager.UNEXPECTED_ERROR,
+        log.info(MessageManager.unexpectedError + e.getCause());
+        return new ApiError(MessageManager.internalServerError, MessageManager.unexpectedError,
                 e.getMessage(), LocalDateTime.now());
     }
 }

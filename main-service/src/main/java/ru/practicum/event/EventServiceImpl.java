@@ -63,7 +63,7 @@ public class EventServiceImpl implements EventService {
                 .orElseThrow(() -> new CategoryNotFoundException(newEventDto.getCategory()));
         Event event = toEvent(newEventDto);
         if (event.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
-            throw new ValidationRequestException(MessageManager.CANNOT_CREATE_THE_EVENT_2_HOURS);
+            throw new ValidationRequestException(MessageManager.cannotCreateTheEvent2Hours);
         }
         event.setCategory(category);
         event.setCreatedOn(LocalDateTime.now());
@@ -106,7 +106,7 @@ public class EventServiceImpl implements EventService {
         if (event.getState() != null
                 && event.getState() != EventState.PENDING
                 && event.getState() != EventState.CANCELED) {
-            throw new ForbiddenException(MessageManager.ONLY_CHANGED_EVENTS);
+            throw new ForbiddenException(MessageManager.onlyChangedEvents);
         }
         if (updateEventUserRequestDto.getEventDate() != null
                 && LocalDateTime.parse(updateEventUserRequestDto.getEventDate(), formatter)
@@ -171,19 +171,19 @@ public class EventServiceImpl implements EventService {
         if (updateEventAdminRequestDto.getStateAction() != null) {
             if (updateEventAdminRequestDto.getStateAction() == StateAdminAction.PUBLISH_EVENT) {
                 if (event.getState() != EventState.PENDING) {
-                    throw new ForbiddenException(MessageManager.CANNOT_PUBLISHER_NOT_IN_RIGHT_STATE + event.getState());
+                    throw new ForbiddenException(MessageManager.cannotPublisherNotInRightState + event.getState());
                 }
                 if (event.getPublishedOn() != null
                         && event.getEventDate().isAfter(event.getPublishedOn().minusHours(1))) {
                     throw new ValidationRequestException(
-                            MessageManager.CANNOT_CREATE_THE_EVENT_1_HOURS);
+                            MessageManager.cannotCreateTheEvent1Hours);
                 }
                 event.setPublishedOn(LocalDateTime.now());
                 event.setState(EventState.PUBLISHED);
             }
             if (updateEventAdminRequestDto.getStateAction() == StateAdminAction.REJECT_EVENT) {
                 if (event.getState() == EventState.PUBLISHED) {
-                    throw new ForbiddenException(MessageManager.CANNOT_REJECT_ALREADY_PUBLISHER);
+                    throw new ForbiddenException(MessageManager.cannotRejectAlreadyPublisher);
                 } else {
                     event.setState(EventState.CANCELED);
                 }
@@ -272,7 +272,7 @@ public class EventServiceImpl implements EventService {
                 .build());
         if (rangeStart != null && rangeEnd != null &&
                 LocalDateTime.parse(rangeStart, formatter).isAfter(LocalDateTime.parse(rangeEnd, formatter))) {
-            throw new ValidationRequestException(MessageManager.DATE_START_AFTER_END);
+            throw new ValidationRequestException(MessageManager.dateStartAfterEnd);
         }
         List<Event> events = eventRepository.findPublishedEvents(
                 text,
@@ -297,7 +297,7 @@ public class EventServiceImpl implements EventService {
                     case VIEWS:
                         eventShortDtos.sort(Comparator.comparing(EventShortDto::getViews));
                         break;
-                    default: throw new ValidationRequestException(MessageManager.NOT_VALID);
+                    default: throw new ValidationRequestException(MessageManager.notValid);
                 }
             }
         }
@@ -330,7 +330,7 @@ public class EventServiceImpl implements EventService {
                 try {
                     EventState.valueOf(state);
                 } catch (IllegalArgumentException e) {
-                    throw new ValidationRequestException(MessageManager.WRONG_STATES);
+                    throw new ValidationRequestException(MessageManager.wrongStates);
                 }
         }
     }
