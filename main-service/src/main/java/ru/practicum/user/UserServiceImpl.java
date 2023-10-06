@@ -5,13 +5,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.discriptions.FromSizeRequest;
 import ru.practicum.user.dto.NewUserRequestDto;
 import ru.practicum.user.dto.UserDto;
+import ru.practicum.user.dto.UserMapper;
 
 import java.util.List;
-
-import static ru.practicum.user.dto.UserMapper.toUser;
-import static ru.practicum.user.dto.UserMapper.toUserDto;
 
 @Transactional
 @Service
@@ -22,23 +21,24 @@ public class UserServiceImpl implements UserService {
 
     @Transactional(readOnly = true)
     public List<UserDto> getUsers(List<Long> ids, int from, int size) {
-        log.info("Getting a list of users by IDs: ids = " + ids + ", from = " + from + ", size = " + size);
-        return toUserDto(userRepository.findByIdIn(ids, PageRequest.of(from / size, size)));
+        log.info("Getting a list of users by IDs: ids = {}, from = {}, size = {}", ids, from, size);
+        return UserMapper.toUserDto(userRepository.findByIdIn(ids, PageRequest.of(from / size, size)));
     }
 
     @Transactional(readOnly = true)
     public List<UserDto> getUsers(int from, int size) {
-        log.info("Getting a list of all users: from = " + from + ", size = " + size);
-        return toUserDto(userRepository.findAll(PageRequest.of(from / size, size)));
+        PageRequest page = FromSizeRequest.of(from, size);
+        log.info("Getting a list of all users: from = {}, size = {}", from, size);
+        return UserMapper.toUserDto(userRepository.findAll(PageRequest.of(from / size, size)));
     }
 
     public UserDto createUser(NewUserRequestDto newUserRequestDto) {
-        log.info("Creating a new user: " + newUserRequestDto);
-        return toUserDto(userRepository.save(toUser(newUserRequestDto)));
+        log.info("Creating a new user: {}", newUserRequestDto);
+        return UserMapper.toUserDto(userRepository.save(UserMapper.toUser(newUserRequestDto)));
     }
 
     public void deleteUser(Long id) {
-        log.info("Deleting a user with an ID = " + id);
+        log.info("Deleting a user with an ID = {}", id);
         userRepository.deleteById(id);
     }
 }

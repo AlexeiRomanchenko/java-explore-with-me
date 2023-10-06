@@ -12,7 +12,7 @@ public class MessageManager {
     public final String forbidden = "FORBIDDEN";
     public final String requestIncorrectly = "Incorrectly made request.";
     public final String endBeforeStart = "The start date must be Before the end date.";
-    public final String receivedGet = "Request received GET {}";
+    public final String receivedGet = "Request received GET {} : {}";
     public final String receivedGetId = "Request received GET {}/{}";
     public final String receivedPost = "Request received POST {}";
     public final String receivedPostId = "Request received POST {}/{}";

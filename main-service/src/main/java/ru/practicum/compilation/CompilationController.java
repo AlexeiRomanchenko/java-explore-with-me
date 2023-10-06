@@ -39,21 +39,21 @@ public class CompilationController {
     }
 
     @GetMapping("/compilations/{compId}")
-    public CompilationDto getCompilationById(@PathVariable @Valid @Positive Long compId) {
+    public CompilationDto getCompilationById(@PathVariable @Positive Long compId) {
         log.info(MessageManager.receivedGetId, "/compilations", compId);
         return compilationService.getCompilationById(compId);
     }
 
     @PostMapping("/admin/compilations")
     @ResponseStatus(HttpStatus.CREATED)
-    public CompilationDto createCompilation(@RequestBody @Validated NewCompilationDto newCompilationDto) {
+    public CompilationDto createCompilation(@RequestBody @Valid NewCompilationDto newCompilationDto) {
         log.info(MessageManager.receivedPost, "/admin/compilations");
         return compilationService.createCompilation(newCompilationDto);
     }
 
     @PatchMapping("/admin/compilations/{compId}")
-    public CompilationDto updateCompilation(@PathVariable @Valid @Positive Long compId,
-                                            @RequestBody @Validated
+    public CompilationDto updateCompilation(@PathVariable @Positive Long compId,
+                                            @RequestBody @Valid
                                             UpdateCompilationRequestDto updateCompilationRequestDto) {
         log.info(MessageManager.receivedPatch, "/admin/compilations", compId);
         return compilationService.updateCompilation(compId, updateCompilationRequestDto);
@@ -61,7 +61,7 @@ public class CompilationController {
 
     @DeleteMapping(value = "/admin/compilations/{compId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteCompilation(@PathVariable @Valid @Positive Long compId) {
+    public void deleteCompilation(@PathVariable @Positive Long compId) {
         log.info(MessageManager.receivedDelete, "/admin/compilations", compId);
         compilationService.deleteCompilation(compId);
     }

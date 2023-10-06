@@ -6,43 +6,26 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.StatClient;
+import ru.practicum.category.Category;
+import ru.practicum.category.CategoryRepository;
 import ru.practicum.discriptions.ConstantManager;
 import ru.practicum.discriptions.MessageManager;
 import ru.practicum.dto.HitDto;
-import ru.practicum.StatClient;
 import ru.practicum.dto.StatDto;
-import ru.practicum.category.Category;
-import ru.practicum.category.CategoryRepository;
-import ru.practicum.event.dto.EventFullDto;
-import ru.practicum.event.dto.EventMapper;
-import ru.practicum.event.dto.EventShortDto;
-import ru.practicum.event.dto.NewEventDto;
-import ru.practicum.event.dto.UpdateEventAdminRequestDto;
-import ru.practicum.event.dto.UpdateEventUserRequestDto;
-import ru.practicum.exceptions.CategoryNotFoundException;
-import ru.practicum.exceptions.EventNotFoundException;
-import ru.practicum.exceptions.ForbiddenException;
-import ru.practicum.exceptions.UserNotFoundException;
-import ru.practicum.exceptions.ValidationRequestException;
+import ru.practicum.event.dto.*;
+import ru.practicum.exceptions.*;
 import ru.practicum.location.Location;
 import ru.practicum.location.LocationRepository;
+import ru.practicum.location.dto.LocationMapper;
 import ru.practicum.user.User;
 import ru.practicum.user.UserRepository;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
-
-import static ru.practicum.event.dto.EventMapper.countConfirmedRequests;
-import static ru.practicum.event.dto.EventMapper.toEvent;
-import static ru.practicum.event.dto.EventMapper.toEventFullDto;
-import static ru.practicum.location.dto.LocationMapper.toLocation;
 
 @Service
 @Transactional
@@ -58,11 +41,11 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventFullDto createEvent(Long userId, NewEventDto newEventDto) {
-        log.info("Adding a new event: user_id = " + userId + ", event = " + newEventDto);
+        log.info("Adding a new event: user_id = {}, event = {}", userId, newEventDto);
         User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
         Category category = categoryRepository.findById(newEventDto.getCategory())
                 .orElseThrow(() -> new CategoryNotFoundException(newEventDto.getCategory()));
-        Event event = toEvent(newEventDto);
+        Event event = EventMapper.toEvent(newEventDto);
         if (event.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
             throw new ValidationRequestException(MessageManager.cannotCreateTheEvent2Hours);
         }
@@ -70,16 +53,15 @@ public class EventServiceImpl implements EventService {
         event.setCreatedOn(LocalDateTime.now());
         event.setInitiator(user);
         event.setState(EventState.PENDING);
-        event.setLocation(locationRepository.save(toLocation(newEventDto.getLocation())));
+        event.setLocation(locationRepository.save(LocationMapper.toLocation(newEventDto.getLocation())));
         event.setViews(0L);
-        return toEventFullDto(eventRepository.save(event));
+        return EventMapper.toEventFullDto(eventRepository.save(event));
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<EventShortDto> getEvents(Long userId, int from, int size) {
-        log.info("Getting events added by the current user: user_id = " + userId + ", from = " + from +
-                ", size = " + size);
+        log.info("Getting events added by the current user: user_id = {}, from = {}, size = {}", userId, from, size);
         userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
         List<Event> events = eventRepository.findByInitiatorId(userId, PageRequest.of(from / size, size));
         return events.stream()
@@ -90,18 +72,18 @@ public class EventServiceImpl implements EventService {
     @Override
     @Transactional(readOnly = true)
     public EventFullDto getEventById(Long userId, Long eventId) {
-        log.info("Getting full information about the event added by the current user: user_id = " + userId +
-                ", event_id = " + eventId);
+        log.info("Getting full information about the event added by the current user: user_id = {}, event_id = {}",
+                userId, eventId);
         userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
-        return toEventFullDto(eventRepository.findById(eventId)
+        return EventMapper.toEventFullDto(eventRepository.findById(eventId)
                 .orElseThrow(() -> new EventNotFoundException(eventId)));
     }
 
     @Override
     public EventFullDto updateEventByUser(Long userId, Long eventId,
                                           UpdateEventUserRequestDto updateEventUserRequestDto) {
-        log.info("Updating event information: user_id = " + userId + ", event_id = " + eventId +
-                ", update_event = " + updateEventUserRequestDto);
+        log.info("Updating event information: user_id = {}, event_id = {}, update_event = {}",
+                userId, eventId, updateEventUserRequestDto);
         userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
         Event event = eventRepository.findById(eventId).orElseThrow(() -> new EventNotFoundException(eventId));
         if (event.getState() != null
@@ -114,7 +96,7 @@ public class EventServiceImpl implements EventService {
                 .isBefore(LocalDateTime.now().plusHours(2))) {
             throw new ValidationRequestException(
                     String.format("Event date must not be before 2 hours from current time. New value: %s",
-                    updateEventUserRequestDto.getEventDate()));
+                            updateEventUserRequestDto.getEventDate()));
         }
         if (updateEventUserRequestDto.getTitle() != null) {
             event.setTitle(updateEventUserRequestDto.getTitle());
@@ -153,7 +135,7 @@ public class EventServiceImpl implements EventService {
             event.setParticipantLimit(updateEventUserRequestDto.getParticipantLimit());
         }
         if (updateEventUserRequestDto.getStateAction() == null) {
-            return toEventFullDto(eventRepository.save(event));
+            return EventMapper.toEventFullDto(eventRepository.save(event));
         }
         if (updateEventUserRequestDto.getStateAction() == StateUserAction.CANCEL_REVIEW) {
             event.setState(EventState.CANCELED);
@@ -161,13 +143,13 @@ public class EventServiceImpl implements EventService {
         if (updateEventUserRequestDto.getStateAction() == StateUserAction.SEND_TO_REVIEW) {
             event.setState(EventState.PENDING);
         }
-        return toEventFullDto(eventRepository.save(event));
+        return EventMapper.toEventFullDto(eventRepository.save(event));
     }
 
     @Override
     public EventFullDto updateEventByAdmin(Long eventId, UpdateEventAdminRequestDto updateEventAdminRequestDto) {
-        log.info("updating information about the event by the administrator: event_id = "
-                + eventId + ", update_event = " + updateEventAdminRequestDto);
+        log.info("updating information about the event by the administrator: event_id = {}, update_event = {}",
+                eventId, updateEventAdminRequestDto);
         Event event = eventRepository.findById(eventId).orElseThrow(() -> new EventNotFoundException(eventId));
         if (updateEventAdminRequestDto.getStateAction() != null) {
             if (updateEventAdminRequestDto.getStateAction() == StateAdminAction.PUBLISH_EVENT) {
@@ -195,7 +177,7 @@ public class EventServiceImpl implements EventService {
                 .isBefore(LocalDateTime.now().plusHours(2))) {
             throw new ValidationRequestException(
                     String.format("Event date must not be before 2 hours from current time. New value: %s",
-                    updateEventAdminRequestDto.getEventDate()));
+                            updateEventAdminRequestDto.getEventDate()));
         }
         if (updateEventAdminRequestDto.getTitle() != null) {
             event.setTitle(updateEventAdminRequestDto.getTitle());
@@ -232,15 +214,16 @@ public class EventServiceImpl implements EventService {
         if (updateEventAdminRequestDto.getParticipantLimit() != null) {
             event.setParticipantLimit(updateEventAdminRequestDto.getParticipantLimit());
         }
-        return toEventFullDto(eventRepository.save(event));
+        return EventMapper.toEventFullDto(eventRepository.save(event));
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<EventFullDto> getEventsByAdmin(List<Long> users, List<String> states, List<Long> categories,
                                                String rangeStart, String rangeEnd, int from, int size) {
-        log.info("Search for events by parameters: user_ids = " + users + ", states = " + states
-                + ", categories = " + categories + ", rangeStart = " + rangeStart + ", rangeEnd = " + rangeEnd);
+        log.info("Search for events by parameters: user_ids = {}, states = {}, categories = {},"
+                        + " rangeStart = {}, rangeEnd = {}",
+                users, states, categories, rangeStart, rangeEnd);
         validateEventStates(states);
         List<Event> events = eventRepository.findEvents(users,
                 states, categories,
@@ -259,10 +242,9 @@ public class EventServiceImpl implements EventService {
                                                   String rangeEnd, boolean onlyAvailable,
                                                   String sort, int from, int size,
                                                   HttpServletRequest request) {
-        log.info("Search for published events by parameters: text = " + text + ", categories = " + categories +
-                ", paid = " + paid + ", rangeStart = " + rangeStart + ", rangeEnd = " + rangeEnd +
-                ", onlyAvailable = " + onlyAvailable + ", sort = " + sort + ", from = " + from +
-                ", size = " + size);
+        log.info("Search for published events by parameters: text = {}, categories = {}, paid = {}," +
+                        " rangeStart = {}, rangeEnd = {}, onlyAvailable = {}, sort = {}, from = {}, size = {}",
+                text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size);
         log.info("Client ip: {}", request.getRemoteAddr());
         log.info("Endpoint path: {}", request.getRequestURI());
         statClient.addHit(HitDto.builder()
@@ -287,7 +269,7 @@ public class EventServiceImpl implements EventService {
             eventShortDtos = events.stream().map(EventMapper::toEventShortDto).collect(Collectors.toList());
             if (onlyAvailable) {
                 eventShortDtos = events.stream().filter(event ->
-                        countConfirmedRequests(event.getRequests()) < event.getParticipantLimit()
+                        EventMapper.countConfirmedRequests(event.getRequests()) < event.getParticipantLimit()
                 ).map(EventMapper::toEventShortDto).collect(Collectors.toList());
             }
             if (sort != null) {
@@ -298,7 +280,8 @@ public class EventServiceImpl implements EventService {
                     case VIEWS:
                         eventShortDtos.sort(Comparator.comparing(EventShortDto::getViews));
                         break;
-                    default: throw new ValidationRequestException(MessageManager.notValid);
+                    default:
+                        throw new ValidationRequestException(MessageManager.notValid);
                 }
             }
         }
@@ -307,7 +290,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventFullDto getPublishedEventById(Long eventId, HttpServletRequest request) {
-        log.info("Getting information about a published event by ID: event_id = " + eventId);
+        log.info("Getting information about a published event by ID: event_id = {}", eventId);
         Event event = eventRepository.findByIdAndState(eventId, EventState.PUBLISHED)
                 .orElseThrow(() -> new EventNotFoundException(eventId));
         Integer countHits = getCountHits(request);
@@ -322,7 +305,7 @@ public class EventServiceImpl implements EventService {
             event.setViews(event.getViews() + 1);
             eventRepository.save(event);
         }
-        return toEventFullDto(event);
+        return EventMapper.toEventFullDto(event);
     }
 
     private void validateEventStates(List<String> states) {
@@ -342,7 +325,7 @@ public class EventServiceImpl implements EventService {
         ResponseEntity<StatDto[]> response = statClient.getStats(
                 LocalDateTime.now().minusYears(100).format(formatter),
                 LocalDateTime.now().format(formatter),
-                new String[] {request.getRequestURI()},
+                new String[]{request.getRequestURI()},
                 true);
         Optional<StatDto> statDto;
         Integer hits = 0;

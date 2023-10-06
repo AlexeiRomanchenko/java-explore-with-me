@@ -50,6 +50,7 @@ public class ErrorHandler {
             RequestNotFoundException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ApiError handleObjectNotFoundException(EntityNotFoundException e) {
+        log.info(e.getMessage());
         return new ApiError(MessageManager.notFound, MessageManager.requiredNotFound,
                 e.getMessage(), LocalDateTime.now());
     }
@@ -57,6 +58,7 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
     public ApiError handleValidationException(ConstraintViolationException e) {
+        log.info(e.getMessage());
         return new ApiError(MessageManager.conflict, MessageManager.integrityConstraint,
                 e.getMessage(), LocalDateTime.now());
     }
@@ -64,6 +66,7 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
     public ApiError handleValidationException(DataIntegrityViolationException e) {
+        log.info(e.getMessage());
         return new ApiError(MessageManager.conflict, MessageManager.integrityConstraint,
                 e.getMessage(), LocalDateTime.now());
     }
@@ -71,6 +74,7 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
     public ApiError handleValidationException(DataException e) {
+        log.info(e.getMessage());
         return new ApiError(MessageManager.conflict, MessageManager.integrityConstraint,
                 e.getMessage(), LocalDateTime.now());
     }
@@ -78,6 +82,7 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
     public ApiError handleForbiddenException(ForbiddenException e) {
+        log.info(e.getMessage());
         return new ApiError(MessageManager.forbidden, MessageManager.wrongConditions,
                 e.getMessage(), LocalDateTime.now());
     }

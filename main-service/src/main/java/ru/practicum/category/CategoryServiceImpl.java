@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.category.dto.CategoryDto;
 import ru.practicum.category.dto.CategoryMapper;
 import ru.practicum.category.dto.NewCategoryDto;
+import ru.practicum.discriptions.FromSizeRequest;
 import ru.practicum.discriptions.MessageManager;
 import ru.practicum.event.Event;
 import ru.practicum.event.EventRepository;
@@ -16,9 +17,6 @@ import ru.practicum.exceptions.ForbiddenException;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static ru.practicum.category.dto.CategoryMapper.toCategory;
-import static ru.practicum.category.dto.CategoryMapper.toCategoryDto;
 
 @Transactional
 @Service
@@ -31,8 +29,9 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     @Transactional(readOnly = true)
     public List<CategoryDto> getCategories(int from, int size) {
-        log.info("Getting a list of categories: from = " + from + ", size = " + size);
-        return categoryRepository.findAll(PageRequest.of(from / size, size))
+        PageRequest page = FromSizeRequest.of(from, size);
+        log.info("Getting a list of categories: from = {}, size = {}", from, size);
+        return categoryRepository.findAll(page)
                 .stream()
                 .map(CategoryMapper::toCategoryDto)
                 .collect(Collectors.toList());
@@ -41,30 +40,30 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     @Transactional(readOnly = true)
     public CategoryDto getCategoryById(long catId) {
-        log.info("Getting information about a category by ID: cat_id = " + catId);
-        return toCategoryDto(categoryRepository.findById(catId)
+        log.info("Getting information about a category by ID: cat_id = {}", catId);
+        return CategoryMapper.toCategoryDto(categoryRepository.findById(catId)
                 .orElseThrow(() -> new CategoryNotFoundException(catId)));
     }
 
     @Override
     public CategoryDto createCategory(NewCategoryDto newCategoryDto) {
-        log.info("Adding a new category: category name = " + newCategoryDto);
-        return toCategoryDto(categoryRepository.save(toCategory(newCategoryDto)));
+        log.info("Adding a new category: category name = {}", newCategoryDto);
+        return CategoryMapper.toCategoryDto(categoryRepository.save(CategoryMapper.toCategory(newCategoryDto)));
     }
 
     @Override
     public CategoryDto updateCategory(long catId, NewCategoryDto newCategoryDto) {
-        log.info("Updating category: cat_id = " + catId + ", category name = " + newCategoryDto);
+        log.info("Updating category: cat_id = {}, category name = {}", catId, newCategoryDto);
         Category existCategory = categoryRepository.findById(catId)
                 .orElseThrow(() -> new CategoryNotFoundException(catId));
-        Category updatedCategory = toCategory(newCategoryDto);
+        Category updatedCategory = CategoryMapper.toCategory(newCategoryDto);
         updatedCategory.setId(existCategory.getId());
-        return toCategoryDto(categoryRepository.save(updatedCategory));
+        return CategoryMapper.toCategoryDto(categoryRepository.save(updatedCategory));
     }
 
     @Override
     public void deleteCategory(long catId) {
-        log.info("Deleting category: cat_id = " + catId);
+        log.info("Deleting category: cat_id = {}", catId);
         categoryRepository.findById(catId)
                 .orElseThrow(() -> new CategoryNotFoundException(catId));
         Event event = eventRepository.findFirstByCategoryId(catId);

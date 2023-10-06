@@ -1,16 +1,15 @@
 package ru.practicum.request.dto;
 
+import lombok.experimental.UtilityClass;
 import ru.practicum.discriptions.ConstantManager;
 import ru.practicum.request.ParticipationRequest;
 
 import java.time.format.DateTimeFormatter;
 
+@UtilityClass
 public class ParticipationRequestMapper {
 
-    private ParticipationRequestMapper() {
-    }
-
-    public static ParticipationRequestDto toParticipationRequestDto(ParticipationRequest request) {
+    public ParticipationRequestDto toParticipationRequestDto(ParticipationRequest request) {
         return ParticipationRequestDto.builder()
                 .id(request.getId())
                 .event(request.getEvent().getId())

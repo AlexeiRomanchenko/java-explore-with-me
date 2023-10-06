@@ -1,17 +1,16 @@
 package ru.practicum.compilation.dto;
 
+import lombok.experimental.UtilityClass;
 import ru.practicum.compilation.Compilation;
 import ru.practicum.event.dto.EventMapper;
 
 import java.util.Collections;
 import java.util.stream.Collectors;
 
+@UtilityClass
 public class CompilationMapper {
 
-    private CompilationMapper() {
-    }
-
-    public static CompilationDto toCompilationDto(Compilation compilation) {
+    public CompilationDto toCompilationDto(Compilation compilation) {
         return CompilationDto.builder()
                 .id(compilation.getId())
                 .events(compilation.getEvents() != null ?
@@ -23,7 +22,7 @@ public class CompilationMapper {
                 .build();
     }
 
-    public static Compilation toCompilation(NewCompilationDto newCompilationDto) {
+    public Compilation toCompilation(NewCompilationDto newCompilationDto) {
         return Compilation.builder()
                 .pinned(newCompilationDto.getPinned())
                 .title(newCompilationDto.getTitle())

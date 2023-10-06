@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.CreationTimestamp;
 import ru.practicum.category.Category;
 import ru.practicum.compilation.Compilation;
 import ru.practicum.location.Location;
@@ -70,6 +71,7 @@ public class Event {
     private boolean requestModeration;
 
     @Column(name = "created_on")
+    @CreationTimestamp
     private LocalDateTime createdOn;
 
     @Column(name = "published_on")

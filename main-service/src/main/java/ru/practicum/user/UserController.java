@@ -18,6 +18,7 @@ import ru.practicum.discriptions.MessageManager;
 import ru.practicum.user.dto.NewUserRequestDto;
 import ru.practicum.user.dto.UserDto;
 
+import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
@@ -42,7 +43,7 @@ public class UserController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public UserDto createUser(@RequestBody @Validated NewUserRequestDto newUserRequestDto) {
+    public UserDto createUser(@RequestBody @Valid NewUserRequestDto newUserRequestDto) {
         log.info(MessageManager.receivedPost, "/admin/users");
         return userService.createUser(newUserRequestDto);
     }
