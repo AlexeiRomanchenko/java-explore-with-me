@@ -21,15 +21,16 @@ public class UserServiceImpl implements UserService {
 
     @Transactional(readOnly = true)
     public List<UserDto> getUsers(List<Long> ids, int from, int size) {
+        PageRequest page = FromSizeRequest.of(from, size);
         log.info("Getting a list of users by IDs: ids = {}, from = {}, size = {}", ids, from, size);
-        return UserMapper.toUserDto(userRepository.findByIdIn(ids, PageRequest.of(from / size, size)));
+        return UserMapper.toUserDto(userRepository.findByIdIn(ids, page));
     }
 
     @Transactional(readOnly = true)
     public List<UserDto> getUsers(int from, int size) {
         PageRequest page = FromSizeRequest.of(from, size);
         log.info("Getting a list of all users: from = {}, size = {}", from, size);
-        return UserMapper.toUserDto(userRepository.findAll(PageRequest.of(from / size, size)));
+        return UserMapper.toUserDto(userRepository.findAll(page));
     }
 
     public UserDto createUser(NewUserRequestDto newUserRequestDto) {

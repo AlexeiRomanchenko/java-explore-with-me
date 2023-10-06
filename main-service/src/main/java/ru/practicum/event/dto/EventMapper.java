@@ -31,23 +31,39 @@ public class EventMapper {
     }
 
     public EventFullDto toEventFullDto(Event event) {
-        return EventFullDto.builder()
+        EventInfoDto eventInfoDto = EventInfoDto.builder()
                 .id(event.getId())
                 .title(event.getTitle())
                 .annotation(event.getAnnotation())
                 .category(CategoryMapper.toCategoryDto(event.getCategory()))
-                .description(event.getDescription())
                 .eventDate(event.getEventDate().format(formatter))
                 .location(LocationMapper.toLocationDto(event.getLocation()))
+                .build();
+
+        EventDetailsDto eventDetailsDto = EventDetailsDto.builder()
+                .description(event.getDescription())
                 .paid(event.isPaid())
                 .participantLimit(event.getParticipantLimit())
                 .requestModeration(event.isRequestModeration())
                 .confirmedRequests(countConfirmedRequests(event.getRequests()))
+                .build();
+
+        EventMetadataDto eventMetadataDto = EventMetadataDto.builder()
                 .createdOn(event.getCreatedOn().format(formatter))
                 .publishedOn(event.getPublishedOn() != null ? event.getPublishedOn().format(formatter) : null)
-                .initiator(UserMapper.toUserShortDto(event.getInitiator()))
                 .state(event.getState().toString())
                 .views(event.getViews())
+                .build();
+
+        EventUserDto eventUserDto = EventUserDto.builder()
+                .initiator(UserMapper.toUserShortDto(event.getInitiator()))
+                .build();
+
+        return EventFullDto.builder()
+                .eventInfo(eventInfoDto)
+                .eventMetadata(eventMetadataDto)
+                .eventDetails(eventDetailsDto)
+                .eventUser(eventUserDto)
                 .build();
     }
 

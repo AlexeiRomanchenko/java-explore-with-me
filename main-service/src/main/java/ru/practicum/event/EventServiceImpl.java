@@ -10,6 +10,7 @@ import ru.practicum.StatClient;
 import ru.practicum.category.Category;
 import ru.practicum.category.CategoryRepository;
 import ru.practicum.discriptions.ConstantManager;
+import ru.practicum.discriptions.FromSizeRequest;
 import ru.practicum.discriptions.MessageManager;
 import ru.practicum.dto.HitDto;
 import ru.practicum.dto.StatDto;
@@ -61,9 +62,10 @@ public class EventServiceImpl implements EventService {
     @Override
     @Transactional(readOnly = true)
     public List<EventShortDto> getEvents(Long userId, int from, int size) {
+        PageRequest page = FromSizeRequest.of(from, size);
         log.info("Getting events added by the current user: user_id = {}, from = {}, size = {}", userId, from, size);
         userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
-        List<Event> events = eventRepository.findByInitiatorId(userId, PageRequest.of(from / size, size));
+        List<Event> events = eventRepository.findByInitiatorId(userId, page);
         return events.stream()
                 .map(EventMapper::toEventShortDto)
                 .collect(Collectors.toList());
@@ -221,15 +223,16 @@ public class EventServiceImpl implements EventService {
     @Transactional(readOnly = true)
     public List<EventFullDto> getEventsByAdmin(List<Long> users, List<String> states, List<Long> categories,
                                                String rangeStart, String rangeEnd, int from, int size) {
+        PageRequest page = FromSizeRequest.of(from, size);
         log.info("Search for events by parameters: user_ids = {}, states = {}, categories = {},"
                         + " rangeStart = {}, rangeEnd = {}",
                 users, states, categories, rangeStart, rangeEnd);
-        validateEventStates(states);
+
         List<Event> events = eventRepository.findEvents(users,
                 states, categories,
                 rangeStart != null ? LocalDateTime.parse(rangeStart, formatter) : null,
                 rangeEnd != null ? LocalDateTime.parse(rangeEnd, formatter) : null,
-                PageRequest.of(from / size, size));
+                page);
         return events
                 .stream()
                 .map(EventMapper::toEventFullDto)
@@ -242,6 +245,7 @@ public class EventServiceImpl implements EventService {
                                                   String rangeEnd, boolean onlyAvailable,
                                                   String sort, int from, int size,
                                                   HttpServletRequest request) {
+        PageRequest page = FromSizeRequest.of(from, size);
         log.info("Search for published events by parameters: text = {}, categories = {}, paid = {}," +
                         " rangeStart = {}, rangeEnd = {}, onlyAvailable = {}, sort = {}, from = {}, size = {}",
                 text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size);
@@ -263,7 +267,7 @@ public class EventServiceImpl implements EventService {
                 paid,
                 rangeStart != null ? LocalDateTime.parse(rangeStart, formatter) : LocalDateTime.now(),
                 rangeEnd != null ? LocalDateTime.parse(rangeEnd, formatter) : null,
-                PageRequest.of(from / size, size));
+                page);
         List<EventShortDto> eventShortDtos = Collections.emptyList();
         if (events != null) {
             eventShortDtos = events.stream().map(EventMapper::toEventShortDto).collect(Collectors.toList());
@@ -308,17 +312,6 @@ public class EventServiceImpl implements EventService {
         return EventMapper.toEventFullDto(event);
     }
 
-    private void validateEventStates(List<String> states) {
-        if (states != null) {
-            for (String state : states)
-                try {
-                    EventState.valueOf(state);
-                } catch (IllegalArgumentException e) {
-                    throw new ValidationRequestException(MessageManager.wrongStates);
-                }
-        }
-    }
-
     private Integer getCountHits(HttpServletRequest request) {
         log.info("Client ip: {}", request.getRemoteAddr());
         log.info("Endpoint path: {}", request.getRequestURI());
@@ -328,7 +321,7 @@ public class EventServiceImpl implements EventService {
                 new String[]{request.getRequestURI()},
                 true);
         Optional<StatDto> statDto;
-        Integer hits = 0;
+        int hits = 0;
         if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
             statDto = Arrays.stream(response.getBody()).findFirst();
             if (statDto.isPresent()) {
