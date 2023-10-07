@@ -1,12 +1,9 @@
 package ru.practicum.event;
 
-import ru.practicum.event.dto.EventFullDto;
-import ru.practicum.event.dto.EventShortDto;
-import ru.practicum.event.dto.NewEventDto;
-import ru.practicum.event.dto.UpdateEventAdminRequestDto;
-import ru.practicum.event.dto.UpdateEventUserRequestDto;
+import ru.practicum.event.dto.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface EventService {
@@ -22,10 +19,10 @@ public interface EventService {
     EventFullDto updateEventByAdmin(Long eventId, UpdateEventAdminRequestDto updateEventAdminRequestDto);
 
     List<EventFullDto> getEventsByAdmin(List<Long> users, List<String> states, List<Long> categories,
-                                        String rangeStart, String rangeEnd, int from, int size);
+                                        LocalDateTime rangeStart, LocalDateTime rangeEnd, int from, int size);
 
-    List<EventShortDto> getPublishedEvents(String text, List<Long> categories, Boolean paid, String rangeStart,
-                                           String rangeEnd, boolean onlyAvailable, String sort,
+    List<EventShortDto> getPublishedEvents(String text, List<Long> categories, Boolean paid, LocalDateTime rangeStart,
+                                           LocalDateTime rangeEnd, boolean onlyAvailable, String sort,
                                            int from, int size, HttpServletRequest request);
 
     EventFullDto getPublishedEventById(Long eventId, HttpServletRequest request);

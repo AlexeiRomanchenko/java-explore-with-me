@@ -94,7 +94,7 @@ public class EventServiceImpl implements EventService {
             throw new ForbiddenException(MessageManager.onlyChangedEvents);
         }
         if (updateEventUserRequestDto.getEventDate() != null
-                && LocalDateTime.parse(updateEventUserRequestDto.getEventDate(), formatter)
+                && updateEventUserRequestDto.getEventDate()
                 .isBefore(LocalDateTime.now().plusHours(2))) {
             throw new ValidationRequestException(
                     String.format("Event date must not be before 2 hours from current time. New value: %s",
@@ -114,8 +114,7 @@ public class EventServiceImpl implements EventService {
             event.setDescription(updateEventUserRequestDto.getDescription());
         }
         if (updateEventUserRequestDto.getEventDate() != null) {
-            event.setEventDate(LocalDateTime.parse(updateEventUserRequestDto.getEventDate(),
-                    DateTimeFormatter.ofPattern(ConstantManager.DATE_TIME_PATTERN)));
+            event.setEventDate(updateEventUserRequestDto.getEventDate());
         }
         if (updateEventUserRequestDto.getLocation() != null) {
             Location location = event.getLocation();
@@ -175,7 +174,7 @@ public class EventServiceImpl implements EventService {
             }
         }
         if (updateEventAdminRequestDto.getEventDate() != null
-                && LocalDateTime.parse(updateEventAdminRequestDto.getEventDate(), formatter)
+                && updateEventAdminRequestDto.getEventDate()
                 .isBefore(LocalDateTime.now().plusHours(2))) {
             throw new ValidationRequestException(
                     String.format("Event date must not be before 2 hours from current time. New value: %s",
@@ -195,7 +194,7 @@ public class EventServiceImpl implements EventService {
             event.setDescription(updateEventAdminRequestDto.getDescription());
         }
         if (updateEventAdminRequestDto.getEventDate() != null) {
-            event.setEventDate(LocalDateTime.parse(updateEventAdminRequestDto.getEventDate(), formatter));
+            event.setEventDate(updateEventAdminRequestDto.getEventDate());
         }
         if (updateEventAdminRequestDto.getLocation() != null) {
             Location location = event.getLocation();
@@ -222,7 +221,7 @@ public class EventServiceImpl implements EventService {
     @Override
     @Transactional(readOnly = true)
     public List<EventFullDto> getEventsByAdmin(List<Long> users, List<String> states, List<Long> categories,
-                                               String rangeStart, String rangeEnd, int from, int size) {
+                                               LocalDateTime rangeStart, LocalDateTime rangeEnd, int from, int size) {
         PageRequest page = FromSizeRequest.of(from, size);
         log.info("Search for events by parameters: user_ids = {}, states = {}, categories = {},"
                         + " rangeStart = {}, rangeEnd = {}",
@@ -230,8 +229,8 @@ public class EventServiceImpl implements EventService {
 
         List<Event> events = eventRepository.findEvents(users,
                 states, categories,
-                rangeStart != null ? LocalDateTime.parse(rangeStart, formatter) : null,
-                rangeEnd != null ? LocalDateTime.parse(rangeEnd, formatter) : null,
+                rangeStart,
+                rangeEnd,
                 page);
         return events
                 .stream()
@@ -241,8 +240,8 @@ public class EventServiceImpl implements EventService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<EventShortDto> getPublishedEvents(String text, List<Long> categories, Boolean paid, String rangeStart,
-                                                  String rangeEnd, boolean onlyAvailable,
+    public List<EventShortDto> getPublishedEvents(String text, List<Long> categories, Boolean paid, LocalDateTime rangeStart,
+                                                  LocalDateTime rangeEnd, boolean onlyAvailable,
                                                   String sort, int from, int size,
                                                   HttpServletRequest request) {
         PageRequest page = FromSizeRequest.of(from, size);
@@ -258,15 +257,15 @@ public class EventServiceImpl implements EventService {
                 .timestamp(LocalDateTime.now().format(formatter))
                 .build());
         if (rangeStart != null && rangeEnd != null &&
-                LocalDateTime.parse(rangeStart, formatter).isAfter(LocalDateTime.parse(rangeEnd, formatter))) {
+                rangeStart.isAfter(rangeEnd)) {
             throw new ValidationRequestException(MessageManager.dateStartAfterEnd);
         }
         List<Event> events = eventRepository.findPublishedEvents(
                 text,
                 categories,
                 paid,
-                rangeStart != null ? LocalDateTime.parse(rangeStart, formatter) : LocalDateTime.now(),
-                rangeEnd != null ? LocalDateTime.parse(rangeEnd, formatter) : null,
+                rangeStart != null ? rangeStart : LocalDateTime.now(),
+                rangeEnd,
                 page);
         List<EventShortDto> eventShortDtos = Collections.emptyList();
         if (events != null) {

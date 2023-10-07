@@ -2,27 +2,23 @@ package ru.practicum.event.dto;
 
 import lombok.experimental.UtilityClass;
 import ru.practicum.category.dto.CategoryMapper;
-import ru.practicum.discriptions.ConstantManager;
 import ru.practicum.event.Event;
 import ru.practicum.location.dto.LocationMapper;
 import ru.practicum.request.ParticipationRequest;
 import ru.practicum.request.ParticipationRequestStatus;
 import ru.practicum.user.dto.UserMapper;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @UtilityClass
 public class EventMapper {
-    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(ConstantManager.DATE_TIME_PATTERN);
 
     public Event toEvent(NewEventDto newEventDto) {
         return Event.builder()
                 .title(newEventDto.getTitle())
                 .annotation(newEventDto.getAnnotation())
                 .description(newEventDto.getDescription())
-                .eventDate(LocalDateTime.parse(newEventDto.getEventDate(), formatter))
+                .eventDate(newEventDto.getEventDate())
                 .location(LocationMapper.toLocation(newEventDto.getLocation()))
                 .paid(newEventDto.isPaid())
                 .participantLimit(newEventDto.getParticipantLimit())
@@ -36,7 +32,7 @@ public class EventMapper {
                 .title(event.getTitle())
                 .annotation(event.getAnnotation())
                 .category(CategoryMapper.toCategoryDto(event.getCategory()))
-                .eventDate(event.getEventDate().format(formatter))
+                .eventDate(event.getEventDate())
                 .location(LocationMapper.toLocationDto(event.getLocation()))
                 .build();
 
@@ -49,8 +45,8 @@ public class EventMapper {
                 .build();
 
         EventMetadataDto eventMetadataDto = EventMetadataDto.builder()
-                .createdOn(event.getCreatedOn().format(formatter))
-                .publishedOn(event.getPublishedOn() != null ? event.getPublishedOn().format(formatter) : null)
+                .createdOn(event.getCreatedOn())
+                .publishedOn(event.getPublishedOn() != null ? event.getPublishedOn() : null)
                 .state(event.getState().toString())
                 .views(event.getViews())
                 .build();
@@ -73,7 +69,7 @@ public class EventMapper {
                 .title(event.getTitle())
                 .annotation(event.getAnnotation())
                 .category(CategoryMapper.toCategoryDto(event.getCategory()))
-                .eventDate(event.getEventDate().format(formatter))
+                .eventDate(event.getEventDate())
                 .confirmedRequests(countConfirmedRequests(event.getRequests()))
                 .initiator(UserMapper.toUserShortDto(event.getInitiator()))
                 .paid(event.isPaid())

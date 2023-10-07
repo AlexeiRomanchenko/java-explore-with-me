@@ -37,7 +37,7 @@ public class ParticipationRequestController {
 
     @GetMapping("/users/{userId}/requests")
     public List<ParticipationRequestDto> getParticipationRequests(@PathVariable @Positive Long userId) {
-        log.info(MessageManager.receivedGet, "/users/{userId}/requests", userId);
+        log.info(MessageManager.receivedGetId, "/users/{userId}/requests", userId);
         return participationRequestService.getParticipationRequests(userId);
     }
 

@@ -37,7 +37,7 @@ public class UserController {
     public List<UserDto> getUsers(@RequestParam(required = false) List<Long> ids,
                                   @RequestParam(defaultValue = "0") @PositiveOrZero int from,
                                   @RequestParam(defaultValue = "10") @Positive int size) {
-        log.info(MessageManager.receivedGet, "/admin/users", ids);
+        log.info(MessageManager.receivedGetId, "/admin/users", ids);
         return ids == null ? userService.getUsers(from, size) : userService.getUsers(ids, from, size);
     }
 
