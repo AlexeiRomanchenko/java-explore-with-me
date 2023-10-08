@@ -28,4 +28,8 @@ public class MessageManager {
     public final String cannotPublisherNotInRightState = "Cannot publish the event because it's not in the right state: ";
     public final String cannotRejectAlreadyPublisher = "Cannot reject the event because it's already published";
     public final String categooryNoEmply = "The category is not empty";
+    public final String canNotUpdateCommentOtherUser = "Can not update comment from other user.";
+    public final String canNotUpdateConfirmedComment = "Can not update confirmed comment.";
+    public final String canNotDeleteCommentOtherUser = "Can not delete comment from other user.";
+    public final String canNotDeleteConfirmedComment = "Can not delete confirmed comment.";
 }
