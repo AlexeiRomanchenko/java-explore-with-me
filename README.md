@@ -3,7 +3,7 @@
 Бэкенд приложения **ExploreWithMe** (англ. «исследуй со мной») дает возможность делиться информацией об интересных событиях и помогает найти компанию для участия в них.
 
 Приложение, которое создает афишу. В этой афише можно предложить какое-либо событие от выставки до похода в кино и собрать компанию для участия в нём.
-![main front](./front%20page.png)
+![main front](img/front%20page.png)
 
 - Выбрана дополнительная функциональность - комментарии к событиям (comments).
 ### Стек:
@@ -28,7 +28,7 @@ Java, Spring Boot, SQL, PostgreSQL, JPA, Hibernate, Maven, Docker.
 2. [Сервис статистики (swagger)](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/Keindel/java-explore-with-me/main/ewm-stats-service-spec.json)
 
 ## Схема базы данных:
-![er-diagram](er_diagram.png)
+![er-diagram](img/er_diagram.png)
 
 # Этап 1. Сервис статистики
 <details> <summary> Техническое задание. Часть 1 </summary>  
@@ -80,7 +80,7 @@ Java, Spring Boot, SQL, PostgreSQL, JPA, Hibernate, Maven, Docker.
 в котором будут размещены общие классы DTO.
 
 Структуру модулей и зависимостей можно представить в виде такой схемы.
-![img.png](img.png)
+![img.png](img/img.png)
 
 2. Поработайте с файлами.
     *  модули основного сервиса и сервиса статистики должны содержать `dockerfile`;
@@ -193,9 +193,9 @@ Pull Request на платформе GitHub и нажать кнопку `Merge 
 2. В аккаунте GitHub выберите ветку — `feature_NAME`.
 3. Нажмите на кнопку “Code” и выберите “Download ZIP”.
 
-![img_1.png](img_1.png)
+![img_1.png](img/img_1.png)
 
-![img_2.png](img_2.png)
+![img_2.png](img/img_2.png)
 Не забудьте обновлять архив перед каждой проверкой. Если код в архиве и
 репозитории будет отличаться, работа будет отклонена от проверки.
 Как только работа будет зачтена, нажмите кнопку `“Merge”`, чтобы применить
@@ -204,4 +204,3 @@ Pull Request на платформе GitHub и нажать кнопку `Merge 
 </details>
 
 ### [Pull request на доп. функциональность - "комментарии к событиям."](https://github.com/AlexeiRomanchenko/java-explore-with-me/pull/5)
-

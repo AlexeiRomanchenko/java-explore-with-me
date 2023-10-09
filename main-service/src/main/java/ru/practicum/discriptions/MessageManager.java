@@ -15,8 +15,11 @@ public class MessageManager {
     public final String receivedGetId = "Request received GET {}/{}";
     public final String receivedPost = "Request received POST {}";
     public final String receivedPostId = "Request received POST {}/{}";
+    public final String receivedPostUserIdEventId = "Request received POST {}/{}/{}";
     public final String receivedPatch = "Request received PATCH {}/{}";
+    public final String receivedPatchUserIdCommentId = "Request received PATCH {}/{}/{}";
     public final String receivedDelete = "Request received DELETE {}/{}";
+    public final String receivedDeleteUserIdCommentId = "Request received DELETE {}/{}/{}";
     public final String dateStartAfterEnd = "Date start is after date end.";
     public final String requiredNotFound = "The required object was not found.";
     public final String integrityConstraint = "Integrity constraint has been violated.";

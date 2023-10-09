@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import ru.practicum.event.Event;
 import ru.practicum.user.User;
 
@@ -55,6 +56,7 @@ public class Comment {
     private LocalDateTime createdOn;
 
     @Column(name = "updated_on")
+    @UpdateTimestamp
     private LocalDateTime updatedOn;
 
     @Column(name = "published_on")
