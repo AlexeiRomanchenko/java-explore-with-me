@@ -15,8 +15,11 @@ public class MessageManager {
     public final String receivedGetId = "Request received GET {}/{}";
     public final String receivedPost = "Request received POST {}";
     public final String receivedPostId = "Request received POST {}/{}";
+    public final String receivedPostUserIdEventId = "Request received POST {}/{}/{}";
     public final String receivedPatch = "Request received PATCH {}/{}";
+    public final String receivedPatchUserIdCommentId = "Request received PATCH {}/{}/{}";
     public final String receivedDelete = "Request received DELETE {}/{}";
+    public final String receivedDeleteUserIdCommentId = "Request received DELETE {}/{}/{}";
     public final String dateStartAfterEnd = "Date start is after date end.";
     public final String requiredNotFound = "The required object was not found.";
     public final String integrityConstraint = "Integrity constraint has been violated.";
@@ -28,4 +31,8 @@ public class MessageManager {
     public final String cannotPublisherNotInRightState = "Cannot publish the event because it's not in the right state: ";
     public final String cannotRejectAlreadyPublisher = "Cannot reject the event because it's already published";
     public final String categooryNoEmply = "The category is not empty";
+    public final String canNotUpdateCommentOtherUser = "Can not update comment from other user.";
+    public final String canNotUpdateConfirmedComment = "Can not update confirmed comment.";
+    public final String canNotDeleteCommentOtherUser = "Can not delete comment from other user.";
+    public final String canNotDeleteConfirmedComment = "Can not delete confirmed comment.";
 }
